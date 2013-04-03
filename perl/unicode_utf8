@@ -1,0 +1,47 @@
+#!/usr/bin/env perl
+#refs. http://blog.livedoor.jp/dankogai/archives/51856751.html
+use strict;
+use warnings;
+use Encode qw();
+use Unicode::UTF8 qw();
+use Benchmark qw/:all/;
+
+my $bytes = do {
+    local $/;
+    open my $fh, '<', $0 or die "$0:$!";
+    my $str = <$fh>;
+    close $fh;
+    $str;
+};
+
+use Data::Dumper;
+local $Data::Dumper::Indent = 1;
+local $Data::Dumper::Terse  = 1;
+warn Dumper $bytes;
+
+my $utf8 = Encode::decode_utf8($bytes);
+my $enc  = Encode::find_encoding('utf8');
+
+warn sprintf "%d bytes -> %d chars", length $bytes, length $utf8;
+
+# Decode
+cmpthese timethese - 1,
+  {
+    '$e->decode'    => sub { $enc->decode($bytes) },
+    'E::d_utf8'     => sub { Encode::decode_utf8($bytes) },
+    'u8::decode'    => sub { utf8::decode( my $u = $bytes ) },
+    'U::U8::d_utf8' => sub { Unicode::UTF8::decode_utf8($bytes) },
+  };
+
+# Encode
+cmpthese timethese - 1,
+  {
+    '$e->encode'    => sub { $enc->encode($utf8) },
+    'E::e_utf8 '    => sub { Encode::encode_utf8($utf8) },
+    'u8::encode'    => sub { utf8::encode( my $b = $utf8 ) },
+    'U::U8::e_utf8' => sub { Unicode::UTF8::encode_utf8($utf8) },
+  };
+
+__DATA__
+てすとぉぉぉの技術力はァァァせかいいちいぃぃぃ
+あうふぁｋｓｊｆｊヵあｓｄｌｆ
