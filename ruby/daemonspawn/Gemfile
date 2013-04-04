@@ -1,0 +1,4 @@
+# A sample Gemfile
+source "https://rubygems.org"
+
+gem "daemon-spawn", '0.4.2'
