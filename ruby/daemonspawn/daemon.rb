@@ -3,10 +3,10 @@ require 'daemon_spawn'
 class MyDaemon < DaemonSpawn::Base
   def start(args)
     puts "start : #{Time.now}"
-#    i = 0
-#    loop do
-#        i += 1
-#    end
+    i = 0
+    loop do
+        i += 1
+    end
   end
 
   def stop
@@ -21,6 +21,6 @@ MyDaemon.spawn!({
     :pid_file => './tmp/tmp.pid',
     :log_file => './log/tmp.log',
     :sync_log => true,
-    :singleton => true 
+#    :singleton => true 
   })
 
