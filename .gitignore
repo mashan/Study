@@ -1,0 +1,4 @@
+*.swp
+vendor
+*_log
+*\.lock
