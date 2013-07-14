@@ -1,4 +1,4 @@
-*.swp
+*.swop
 vendor
 *_log
 *\.lock
