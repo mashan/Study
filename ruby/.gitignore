@@ -1,0 +1,7 @@
+Gemfile.lock
+vendor
+doc
+log
+tmp
+.bundle
+*.swp
