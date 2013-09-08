@@ -1,0 +1,8 @@
+# A sample Gemfile
+source "https://rubygems.org"
+
+gem "useragent"
+gem "browser"
+gem "mobylette"
+gem "active_device"
+gem "health_monitor"
