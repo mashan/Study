@@ -6,25 +6,16 @@ describe FrequencyAggregate::Output do
   FREQUENCY_MAXIMUM = 300 # (ms)unit 
   FREQUENCY_SPAN    = 100 # (ms)unit 
   before do
-    @time = Time.parse("Thu Sep 1 00:00:00 GMT 2013")
-
     @inputs = [
-      #[ time, key, response_time(ms) ]
-      [ @time, 'key00', 0 ], 
-      [ @time, 'key00', 100 ], 
-      [ @time, 'key00', 300 ], 
-      [ @time, 'key01', 200 ], 
-      [ @time, 'key01', 300 ], 
-      [ @time, 'key01', 400 ], 
-      [ @time, 'key01', 500 ], 
+      #[ key, response_time(ms) ]
+      [ 'key00', 0 ], 
+      [ 'key00', 100 ], 
+      [ 'key00', 300 ], 
+      [ 'key01', 200 ], 
+      [ 'key01', 300 ], 
+      [ 'key01', 400 ], 
+      [ 'key01', 500 ], 
     ]
-
-    @expected = {
-      @time => {
-        'key00' => [ 0, 100, 300 ],
-        'key01' => [ 200, 300, 400, 500 ],
-      }
-    }
 
     @frequency_aggregate = FrequencyAggregate::Output.new(FREQUENCY_MINIMUM, FREQUENCY_MAXIMUM, FREQUENCY_SPAN)
     @inputs.each do |input|
@@ -33,34 +24,38 @@ describe FrequencyAggregate::Output do
   end
 
   it "new" do
-    frequency_aggregate = FrequencyAggregate::Output.new(FREQUENCY_MINIMUM, FREQUENCY_MAXIMUM, FREQUENCY_SPAN)
     pattern_expected = [
-      [ "unmatched", nil, nil ],
-      [ "under_100", 0, 100 ],
-      [ "under_200", 100, 200 ],
-      [ "under_300", 200, 300 ]
+      [ "under100", Range.new(1, 100) ],
+      [ "under200", Range.new(101, 200) ],
+      [ "under300", Range.new(201, 300) ]
     ]
-    frequency_aggregate.patterns.should == pattern_expected
+    @frequency_aggregate.patterns.should == pattern_expected
   end
 
   it "store" do
-    @frequency_aggregate.entries.should == @expected 
+    stored_expected = {
+      'key00_total' => 3,
+      'key00_unmatched' => 1,
+      'key00_under100' => 1,
+      'key00_under300' => 1,
+      'key01_total' => 4,
+      'key01_unmatched' => 2,
+      'key01_under200' => 1,
+      'key01_under300' => 1,
+    }
+
+    @frequency_aggregate.counts.sort.should == stored_expected.sort
   end
 
   it "generate_result" do
     results = @frequency_aggregate.generate_result
 
-    results[key00_under_100_per].should == 50.0
-    results[key00_under_200_per].should == 0.0
-    results[key00_under_300_per].should == 50.0
-    results[key00_unmatched_per].should == 0.0
+    results["key00_under100_per"].should == 33.3
+    results["key00_under300_per"].should == 33.3
+    results["key00_unmatched_per"].should == 33.3
 
-    results[key01_under_100_per].should == 0.0
-    results[key01_under_200_per].should == 25.0
-    results[key01_under_300_per].should == 25.0
-    results[key01_unmatched_per].should == 50.0
-  end
-
-  it "emit" do
+    results["key01_under200_per"].should == 25.0
+    results["key01_under300_per"].should == 25.0
+    results["key01_unmatched_per"].should == 50.0
   end
 end

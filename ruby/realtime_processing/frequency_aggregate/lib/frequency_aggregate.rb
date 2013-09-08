@@ -7,39 +7,41 @@ module FrequencyAggregate
       @max  = maximum
       @span = span
 
-      @patterns = []
-      @patterns.push([ "unmatched", nil, nil ])
+      @patterns = [] #[ pattern_key, Range ]
       (@min + @span).step(@max, @span) { |i| 
         min = i - @span 
         max = i
-        @patterns.push( [ "under_#{i}", min, max ] )
+        @patterns.push( [ "under#{i}", Range.new( min + 1, max ) ] )
       }
 
-      @result = Hash.new {0}
-
-      @entries = Hash.new { |entry_per_time,time_key| 
-        entry_per_time[time_key] = Hash.new { |entry_per_key,key|
-          entry_per_key[key] = []
-        }
-      }
+      @counts  = Hash.new {0}
     end
 
-    attr_accessor :entries, :patterns
+    attr_accessor :counts, :patterns
 
     def store(input)
-      @entries[input[0]][input[1]].push(input[2])
-    end
+      key, value = input
+      @counts["#{key}_total"] += 1
 
-    def generate_result(time)
-      @entries.each do |time_key, entries|
-        if time_key <= time
-          entries.each do |key, values|
-          end
+      @patterns.each do |pattern|
+        if pattern[1].include?(value)
+          return @counts["#{key}_#{pattern[0]}"] += 1
         end
       end
+
+      @counts["#{key}_unmatched"] += 1
     end
 
-    def emit
+    def generate_result
+      results = Hash.new {0}
+
+      @counts.each do |key, value|
+        k,matched = key.split("_")
+        next if matched == "total"
+
+        results["#{key}_per"] = sprintf( "%.1f", value.to_f / @counts["#{k}_total"] * 100 ).to_f
+      end
+      results
     end
   end
 end
