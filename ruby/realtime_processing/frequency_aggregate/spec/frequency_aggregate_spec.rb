@@ -18,6 +18,7 @@ describe FrequencyAggregate::Output do
     ]
 
     @frequency_aggregate = FrequencyAggregate::Output.new(FREQUENCY_MINIMUM, FREQUENCY_MAXIMUM, FREQUENCY_SPAN)
+
     @inputs.each do |input|
       @frequency_aggregate.store(input)
     end
