@@ -1,8 +1,18 @@
-new_network = { :nodes => [], :old_networks => [] }
+class NetworkResult
+  attr_reader :old_networks, :nodes
 
-new_network[:old_networks] << node.network
-new_network[:nodes] << node
+  def initialize
+    @old_networks, @nodes = [], []
+  end
 
-new_network[:name] = new_network[:old_networks].collect do |network|
-  netrowk.name
-end.join(" - ")
+  def name
+    @old_networks.collect do |network| netrowk.name end.join(" - ")
+  end
+end
+
+new_network = NetworkResult.new
+
+new_network.old_networks << node.network
+new_network.nodes << node
+
+new_network.name
